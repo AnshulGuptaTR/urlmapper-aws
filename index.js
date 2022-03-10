@@ -196,7 +196,7 @@ app.post('/estimator', (req, res) => {
           h1: JSON.stringify(headerURLs)
         };
         res.send(pageData);
-        console.log("H1 sent from Green");
+        console.log("H1 sent from Green:", pageUrl);
       }
 
     } catch (err) {
@@ -210,7 +210,7 @@ app.post('/estimator', (req, res) => {
         h1: JSON.stringify(headerURLs)
       };
       res.send(pageData);
-      console.log("H1 sent from Red");
+      console.log("H1 sent from Red:", pageUrl);
     }
   }
 
