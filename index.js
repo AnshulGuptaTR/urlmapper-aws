@@ -10,6 +10,7 @@ const port = process.env.NODE_ENV === 'production' ? (process.env.PORT || 80) : 
 let sitemapFile = '/sitemap.xml';
 // const fs = require('fs');
 const axios = require('axios');
+console.log(process.env.NODE_ENV);
 
 // app.use(express.json());
 app.use(express.json({ limit: '100MB' }));
@@ -206,6 +207,10 @@ app.post('/estimator', (req, res) => {
       headerURLs.push(h1Val);
       countPages = countPages + 1;
       console.log('err:', pageUrl, err);
+      pageData = {
+        h1: JSON.stringify(headerURLs)
+      };
+      res.send(pageData);
     }
   }
 
