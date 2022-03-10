@@ -180,16 +180,17 @@ app.post('/estimator', (req, res) => {
         };
         headerURLs.push(h1Val);
         countPages = countPages + 1;
+        console.log(countPages, " Status: ", response.status, pageUrl)
         $ = "";
       }
       else {
         h1Val = {
           url: pageUrl,
-          // h1: q,
           statusCode: response.status
         };
         headerURLs.push(h1Val);
-        countPages = countPages + 1;
+        countPages +=  1;
+        console.log(countPages, " Status: ", response.status, pageUrl)
       }
       if (countPages == len) {
         pageData = {
