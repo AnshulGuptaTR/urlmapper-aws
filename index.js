@@ -4,8 +4,8 @@ const app = express();
 const { DOMParser } = require('xmldom');
 const cheerio = require('cheerio');
 var logger = require('./utils/logger');
-const port = process.env.NODE_ENV === 'production' ? (process.env.PORT || 80) : 3000;
-// const port = 3000;
+// const port = process.env.NODE_ENV === 'production' ? (process.env.PORT || 80) : 3000;
+const port = 3001;
 // const port = process.env.NODE_PORT || 3000;
 let sitemapFile = '/sitemap.xml';
 // const fs = require('fs');
@@ -166,7 +166,6 @@ app.post('/estimator', (req, res) => {
 
   async function getH1Content(pageUrl, len) {
     try {
-      failedURLs.splice(failedURLs.indexOf(pageUrl), 1);
       // console.log("Pulling H1 for: ", pageUrl)
       const response = await axios.get(pageUrl);
       if (response.status == 200) {
@@ -197,12 +196,12 @@ app.post('/estimator', (req, res) => {
           h1: JSON.stringify(headerURLs)
         };
         res.send(pageData);
+        console.log("H1 sent from Green");
       }
 
     } catch (err) {
       h1Val = {
-        url: pageUrl,
-        statusCode: response.status
+        url: pageUrl
       };
       headerURLs.push(h1Val);
       countPages = countPages + 1;
@@ -211,6 +210,7 @@ app.post('/estimator', (req, res) => {
         h1: JSON.stringify(headerURLs)
       };
       res.send(pageData);
+      console.log("H1 sent from Red");
     }
   }
 
