@@ -202,10 +202,10 @@ app.post('/estimator', (req, res) => {
       }
 
     } catch (err) {
-      h1Val = {
-        url: pageUrl
-      };
-      headerURLs.push(h1Val);
+      // h1Val = {
+      //   url: pageUrl
+      // };
+      // headerURLs.push(h1Val);
       countPages = countPages + 1;
       // console.log('err:', pageUrl, err);
       console.log(len, countPages, pageUrl)
