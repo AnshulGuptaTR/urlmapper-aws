@@ -193,6 +193,7 @@ app.post('/estimator', (req, res) => {
         console.log(len, countPages, " Status: ", response.status, pageUrl)
       }
       if (countPages == len) {
+        console.log("crawl completed, sending H1");
         pageData = {
           h1: JSON.stringify(headerURLs)
         };
@@ -206,7 +207,7 @@ app.post('/estimator', (req, res) => {
       };
       headerURLs.push(h1Val);
       countPages = countPages + 1;
-      console.log('err:', pageUrl, err);
+      // console.log('err:', pageUrl, err);
       console.log(len, countPages, pageUrl)
       // console.log("H1 sent from Red:", pageUrl);
     }
