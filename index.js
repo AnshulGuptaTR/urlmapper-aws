@@ -172,7 +172,7 @@ app.post('/estimator', (req, res) => {
         // console.log("H1 pulled: ", pageUrl);
         const html = response.data;
         let $ = cheerio.load(html);
-        let q = $('h1').text();
+        let q = $('h1').text().trim();
         h1Val = {
           url: pageUrl,
           h1: q,
@@ -211,12 +211,12 @@ app.post('/estimator', (req, res) => {
       console.log(len, countPages, pageUrl)
       // console.log("H1 sent from Red:", pageUrl);
       if (countPages == len) {
-        console.log("crawl completed, sending H1 from catch");
+        // console.log("crawl completed, sending H1 from catch");
         pageData = {
           h1: JSON.stringify(headerURLs)
         };
         res.send(pageData);
-        console.log("H1 sent from Green:", pageUrl);
+        // console.log("H1 sent from Green:", pageUrl);
       }
     }
   }
