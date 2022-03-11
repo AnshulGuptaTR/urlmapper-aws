@@ -210,6 +210,14 @@ app.post('/estimator', (req, res) => {
       // console.log('err:', pageUrl, err);
       console.log(len, countPages, pageUrl)
       // console.log("H1 sent from Red:", pageUrl);
+      if (countPages == len) {
+        console.log("crawl completed, sending H1 from catch");
+        pageData = {
+          h1: JSON.stringify(headerURLs)
+        };
+        res.send(pageData);
+        console.log("H1 sent from Green:", pageUrl);
+      }
     }
   }
 
