@@ -180,7 +180,7 @@ app.post('/estimator', (req, res) => {
         };
         headerURLs.push(h1Val);
         countPages = countPages + 1;
-        console.log(countPages, " Status: ", response.status, pageUrl)
+        console.log(len, countPages, " Status: ", response.status, pageUrl)
         $ = "";
       }
       else {
@@ -190,7 +190,7 @@ app.post('/estimator', (req, res) => {
         };
         headerURLs.push(h1Val);
         countPages +=  1;
-        console.log(countPages, " Status: ", response.status, pageUrl)
+        console.log(len, countPages, " Status: ", response.status, pageUrl)
       }
       if (countPages == len) {
         pageData = {
@@ -207,11 +207,8 @@ app.post('/estimator', (req, res) => {
       headerURLs.push(h1Val);
       countPages = countPages + 1;
       console.log('err:', pageUrl, err);
-      pageData = {
-        h1: JSON.stringify(headerURLs)
-      };
-      res.send(pageData);
-      console.log("H1 sent from Red:", pageUrl);
+      console.log(len, countPages, pageUrl)
+      // console.log("H1 sent from Red:", pageUrl);
     }
   }
 
