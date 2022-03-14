@@ -142,24 +142,23 @@ app.post('/estimator', (req, res) => {
           }
         });
         allURLs = [];
+        countPages = 0;
         allURLs = allPageLinks;
-        // console.log('allUrls length:', allURLs.length);
-        // console.log('allURLs:', allURLs);
+        console.log('allUrls length:', allURLs.length);
+        console.log('allURLs:', allURLs);
+        $ = "";
       }
-      countPages = 0;
-      allPageLinks.forEach((pageUrl) => {
-        crawlnonsitemaparray(url, pageUrl, allPageLinks.length);
-        // console.log("Crawling inner link: ", url, pageUrl, allPageLinks.length);
+      allURLs.forEach((pageUrl) => {
+        crawlnonsitemaparray(pageUrl, allURLs.length);
       });
-      // res.send(pageData);
+      res.send(pageData);
     } catch (err) {
       console.log('err:', url, err);
     }
   }
 
-  async function crawlnonsitemaparray(url, pageUrl, len) {
+  async function crawlnonsitemaparray(pageUrl, len) {
     try {
-      // console.log("Crawling inner link:", pageUrl, len)
       const response = await axios.get(pageUrl);
       if (response.status === 200) {
         const html = response.data;
@@ -168,7 +167,6 @@ app.post('/estimator', (req, res) => {
         $('a').each(function () {
           var link = $(this);
           var linkUrl = link.attr('href');
-          // console.log("found link: ", linkUrl);
           if (linkUrl !== '' && linkUrl != null && linkUrl !== undefined) {
             var newURL = '';
             if (linkUrl.charAt(0) === '/' || !linkUrl.startsWith('http')) {
@@ -187,33 +185,39 @@ app.post('/estimator', (req, res) => {
         });
         // allURLs = [];
         countPages = countPages + 1;
-        console.log("crawling page if: ", countPages);
       }
       else {
-        countPages = countPages + 1;
-        console.log("crawling page else: ", countPages);
+        countPages +=  1;
       }
       if (countPages == len) {
-        // console.log("crawl completed, sending H1");
+        console.log("crawl completed, sending H1");
         pageData = {
-          allURLs: JSON.stringify(allURLs),
+          h1: JSON.stringify(headerURLs)
+        };
+        res.send(pageData);
+        console.log("H1 sent from Green:", pageUrl);
+      }
+
+    } catch (err) {
+      // h1Val = {
+      //   url: pageUrl
+      // };
+      // headerURLs.push(h1Val);
+      countPages = countPages + 1;
+      // console.log('err:', pageUrl, err);
+      console.log(len, countPages, pageUrl)
+      // console.log("H1 sent from Red:", pageUrl);
+      if (countPages == len) {
+        // console.log("crawl completed, sending H1 from catch");
+        pageData = {
+          h1: JSON.stringify(headerURLs)
         };
         res.send(pageData);
         // console.log("H1 sent from Green:", pageUrl);
       }
-
-    } catch (err) {
-      countPages = countPages + 1;
-      console.log("crawling page catch: ", countPages);
-      // console.log('err:', pageUrl, err);
-      if (countPages == len) {
-        pageData = {
-          allURLs: JSON.stringify(allURLs),
-        };
-        res.send(pageData);
-      }
     }
   }
+
 
   async function getH1Content(pageUrl, len) {
     try {
