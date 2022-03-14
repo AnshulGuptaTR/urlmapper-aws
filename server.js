@@ -4,32 +4,48 @@ const app = express();
 const { DOMParser } = require('xmldom');
 const cheerio = require('cheerio');
 var logger = require('./utils/logger');
+const cors = require("cors");
+const path = require('path');
+const fs = require("fs");
+const html = __dirname + "/dist/";
 // const port = process.env.NODE_ENV === 'production' ? (process.env.PORT || 80) : 3000;
 const port = 3000;
 // const port = process.env.NODE_PORT || 3000;
 let sitemapFile = '/sitemap.xml';
+// const fs = require('fs');
 const axios = require('axios');
+
+// app.use(express.json());
 app.use(express.json({ limit: '100MB' }));
 app.use(function (req, res, next) {
   res.header('Access-Control-Allow-Origin', '*');
   res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
   next();
 });
-app.use('/', router);
+app.use(cors());
+app.use(express.static(html));
+// app.use('/', router);
+// app.use('/', (req, res) => {
+//   // res.sendFile(path.join(__dirname + "/dist/index.html"));
+//   res.sendFile(html + "index.html");
+// });
 
-router.get('/test', (req, res) => {
-  logger.info('Server Sent A Hello World!');
-  res.send('Hello from test!');
-});
+// router.get('/test', (req, res) => {
+//   logger.info('Server Sent A Hello World!');
+//   res.send('Hello from test!');
+// });
 
 app.post('/estimator', (req, res) => {
   const url = req.body.url;
   const h1 = req.body.h1;
+  // console.log('url', url);
   var length = 0;
   var sitemaps = 0;
   var loopSitemaps = 0;
   var count = 0;
   let allURLs = [];
+  // let blogs = [];
+  // let pages = [];
   let pageData = {};
   let allImages = [];
   let allPageLinks = [];
@@ -220,6 +236,9 @@ app.post('/estimator', (req, res) => {
     var xmlDoc = parser.parseFromString(sitemapContent, 'text/xml');
     return xmlDoc;
   }
+});
+app.all("*", (req, res) => {
+  res.sendFile(html + "index.html");
 });
 
 app.listen(port, () => {

@@ -8,3 +8,4 @@ services:
     volumes:
       - ./index.js:/usr/src/app/index.js
       - ./utils:/usr/src/app/utils
+      - ./dist:/usr/src/app/dist
