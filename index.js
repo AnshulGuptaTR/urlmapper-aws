@@ -48,43 +48,49 @@ app.post('/estimator', (req, res) => {
       const sitemapURL = url + sitemapFile;
       console.log('checking sitemap exists:', sitemapURL);
 
-      axios.get(sitemapURL)
-        .then(function (response) {
-          // handle success
-          // console.log(response);
-          var sitemapContent = response.data;
-          console.log('siteContent: ');
-          var XMLSitemap = parseXMLSitemap(sitemapContent);
-          console.log('xml: ');
-          sitemaps = XMLSitemap.getElementsByTagName('sitemap');
-          // var subSitemapContent = undefined;
-          console.log('sitemaps.length:', sitemaps.length);
-          if (sitemaps !== undefined && sitemaps.length > 0) {
-            for (var i = 0; i < sitemaps.length; i++) {
-              console.log('subFileName: ', sitemaps[i].getElementsByTagName('loc')[0].textContent);
-              axios.get(sitemaps[i].getElementsByTagName('loc')[0].textContent)
-                .then(function (response) {
-                  loopSitemaps = loopSitemaps + 1;
-                  var subSitemapContent = response.data;
-                  var subXMLSitemap = parseXMLSitemap(subSitemapContent);
-                  console.log('sub: ', loopSitemaps, sitemaps.length);
-                  if (loopSitemaps == sitemaps.length) {
-                    callback(subXMLSitemap, "pass");
-                  }
-                  else {
-                    callback(subXMLSitemap);
-                  }
-                })
-            }
-          }
-          else {
-            callback(XMLSitemap, "pass");
-          }
-        })
-        .catch(function (error) {
-          console.log('Calling nonsitemap fn:' + url);
+      if(url == "https://www.bettersworthlaw.com" || url == "https://www.bettersworthlaw.com/"){
+          console.log("premature Sitemap call");
           getNonSitemapURLS(url);
-        })
+      }
+      else {
+        axios.get(sitemapURL)
+          .then(function (response) {
+            // handle success
+            // console.log(response);
+            var sitemapContent = response.data;
+            console.log('siteContent: ');
+            var XMLSitemap = parseXMLSitemap(sitemapContent);
+            console.log('xml: ');
+            sitemaps = XMLSitemap.getElementsByTagName('sitemap');
+            // var subSitemapContent = undefined;
+            console.log('sitemaps.length:', sitemaps.length);
+            if (sitemaps !== undefined && sitemaps.length > 0) {
+              for (var i = 0; i < sitemaps.length; i++) {
+                console.log('subFileName: ', sitemaps[i].getElementsByTagName('loc')[0].textContent);
+                axios.get(sitemaps[i].getElementsByTagName('loc')[0].textContent)
+                  .then(function (response) {
+                    loopSitemaps = loopSitemaps + 1;
+                    var subSitemapContent = response.data;
+                    var subXMLSitemap = parseXMLSitemap(subSitemapContent);
+                    console.log('sub: ', loopSitemaps, sitemaps.length);
+                    if (loopSitemaps == sitemaps.length) {
+                      callback(subXMLSitemap, "pass");
+                    }
+                    else {
+                      callback(subXMLSitemap);
+                    }
+                  })
+              }
+            }
+            else {
+              callback(XMLSitemap, "pass");
+            }
+          })
+          .catch(function (error) {
+            console.log('Calling nonsitemap fn:' + url);
+            getNonSitemapURLS(url);
+          })
+      }
     }
 
     // retrieving info from sitemap
