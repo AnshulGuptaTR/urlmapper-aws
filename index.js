@@ -29,6 +29,7 @@ app.post('/estimator', (req, res) => {
   var sitemaps = 0;
   var loopSitemaps = 0;
   var count = 0;
+  let url1;
   let allURLs = [];
   let pageData = {};
   let allImages = [];
@@ -50,7 +51,7 @@ app.post('/estimator', (req, res) => {
 
       if(url == "https://www.bettersworthlaw.com" || url == "https://www.bettersworthlaw.com/"){
           console.log("premature Sitemap call");
-          getNonSitemapURLS(url);
+          getNonSitemapURLS(url, "https://www.bettersworthlaw.com/sitemap");
       }
       else {
         axios.get(sitemapURL)
@@ -88,7 +89,7 @@ app.post('/estimator', (req, res) => {
           })
           .catch(function (error) {
             console.log('Calling nonsitemap fn:' + url);
-            getNonSitemapURLS(url);
+            getNonSitemapURLS(url, url);
           })
       }
     }
@@ -120,10 +121,10 @@ app.post('/estimator', (req, res) => {
     });
   }
 
-  async function getNonSitemapURLS(url) {
+  async function getNonSitemapURLS(url, url1) {
     try {
       console.log('url', url);
-      const response = await axios.get(url);
+      const response = await axios.get(url1);
       if (response.status === 200) {
         const html = response.data;
         let $ = cheerio.load(html);
