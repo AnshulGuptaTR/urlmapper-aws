@@ -100,20 +100,25 @@ app.post('/estimator', (req, res) => {
         var urls = XMLSitemap.getElementsByTagName('url');
         console.log('pulling urls from sitemap:');
         count++;
-
-        for (var i = 0; i < urls.length; i++) {
-          var urlElement = urls[i];
-          var loc = urlElement.getElementsByTagName('loc')[0].textContent;
-          allURLs.push(loc);
+        if (urls.length == 0) {
+          console.log("calling non site map as URL length in 0");
+          getNonSitemapURLS(url, url);
         }
-        console.log('pages: ', array_status, allURLs);
-        length = length + urls.length;
-        if (array_status == "pass") {
-          pageData = {
-            allURLs: JSON.stringify(allURLs),
-          };
-          console.log('H1 no, sending Data: ', allURLs);
-          res.send(pageData);
+        else {
+          for (var i = 0; i < urls.length; i++) {
+            var urlElement = urls[i];
+            var loc = urlElement.getElementsByTagName('loc')[0].textContent;
+            allURLs.push(loc);
+          }
+          console.log('pages: ', array_status, allURLs);
+          length = length + urls.length;
+          if (array_status == "pass") {
+            pageData = {
+              allURLs: JSON.stringify(allURLs),
+            };
+            console.log('H1 no, sending Data: ', allURLs);
+            res.send(pageData);
+          }
         }
       } catch (err) {
         console.log('err:', err);
@@ -140,10 +145,10 @@ app.post('/estimator', (req, res) => {
               }
               newURL = url + "/" + linkUrl.split('#')[0];
               console.log('newURL:', newURL);
-              if (!allPageLinks.includes(newURL) && !newURL.includes('tel') && newURL.startsWith(url)) {
+              if (!allPageLinks.includes(newURL) && !newURL.includes('tel') && !newURL.includes('mailto') && newURL.startsWith(url)) {
                 allPageLinks.push(newURL);
               }
-            } else if (!allPageLinks.includes(linkUrl) && linkUrl.startsWith(url) && !linkUrl.includes('tel')) {
+            } else if (!allPageLinks.includes(linkUrl) && linkUrl.startsWith(url) && !linkUrl.includes('tel') && !linkUrl.includes('mailto')) {
               allPageLinks.push(linkUrl);
             }
           }
@@ -184,10 +189,10 @@ app.post('/estimator', (req, res) => {
               }
               newURL = url + "/" + linkUrl.split('#')[0];
               console.log('newURL:', newURL);
-              if (!allURLs.includes(newURL) && !newURL.includes('tel') && newURL.startsWith(url)) {
+              if (!allURLs.includes(newURL) && !newURL.includes('tel') && !newURL.includes('mailto') && newURL.startsWith(url)) {
                 allURLs.push(newURL);
               }
-            } else if (!allURLs.includes(linkUrl) && linkUrl.startsWith(url) && !linkUrl.includes('tel')) {
+            } else if (!allURLs.includes(linkUrl) && linkUrl.startsWith(url) && !linkUrl.includes('tel') && !linkUrl.includes('mailto')) {
               allURLs.push(linkUrl);
             }
           }
