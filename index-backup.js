@@ -29,6 +29,7 @@ app.post('/estimator', (req, res) => {
   var sitemaps = 0;
   var loopSitemaps = 0;
   var count = 0;
+  let url1;
   let allURLs = [];
   let pageData = {};
   let allImages = [];
@@ -48,43 +49,49 @@ app.post('/estimator', (req, res) => {
       const sitemapURL = url + sitemapFile;
       console.log('checking sitemap exists:', sitemapURL);
 
-      axios.get(sitemapURL)
-        .then(function (response) {
-          // handle success
-          // console.log(response);
-          var sitemapContent = response.data;
-          console.log('siteContent: ');
-          var XMLSitemap = parseXMLSitemap(sitemapContent);
-          console.log('xml: ');
-          sitemaps = XMLSitemap.getElementsByTagName('sitemap');
-          // var subSitemapContent = undefined;
-          console.log('sitemaps.length:', sitemaps.length);
-          if (sitemaps !== undefined && sitemaps.length > 0) {
-            for (var i = 0; i < sitemaps.length; i++) {
-              console.log('subFileName: ', sitemaps[i].getElementsByTagName('loc')[0].textContent);
-              axios.get(sitemaps[i].getElementsByTagName('loc')[0].textContent)
-                .then(function (response) {
-                  loopSitemaps = loopSitemaps + 1;
-                  var subSitemapContent = response.data;
-                  var subXMLSitemap = parseXMLSitemap(subSitemapContent);
-                  console.log('sub: ', loopSitemaps, sitemaps.length);
-                  if (loopSitemaps == sitemaps.length) {
-                    callback(subXMLSitemap, "pass");
-                  }
-                  else {
-                    callback(subXMLSitemap);
-                  }
-                })
+      if(url == "https://www.bettersworthlaw.com" || url == "https://www.bettersworthlaw.com/"){
+          console.log("premature Sitemap call");
+          getNonSitemapURLS(url, "https://www.bettersworthlaw.com/sitemap");
+      }
+      else {
+        axios.get(sitemapURL)
+          .then(function (response) {
+            // handle success
+            // console.log(response);
+            var sitemapContent = response.data;
+            console.log('siteContent: ');
+            var XMLSitemap = parseXMLSitemap(sitemapContent);
+            console.log('xml: ');
+            sitemaps = XMLSitemap.getElementsByTagName('sitemap');
+            // var subSitemapContent = undefined;
+            console.log('sitemaps.length:', sitemaps.length);
+            if (sitemaps !== undefined && sitemaps.length > 0) {
+              for (var i = 0; i < sitemaps.length; i++) {
+                console.log('subFileName: ', sitemaps[i].getElementsByTagName('loc')[0].textContent);
+                axios.get(sitemaps[i].getElementsByTagName('loc')[0].textContent)
+                  .then(function (response) {
+                    loopSitemaps = loopSitemaps + 1;
+                    var subSitemapContent = response.data;
+                    var subXMLSitemap = parseXMLSitemap(subSitemapContent);
+                    console.log('sub: ', loopSitemaps, sitemaps.length);
+                    if (loopSitemaps == sitemaps.length) {
+                      callback(subXMLSitemap, "pass");
+                    }
+                    else {
+                      callback(subXMLSitemap);
+                    }
+                  })
+              }
             }
-          }
-          else {
-            callback(XMLSitemap, "pass");
-          }
-        })
-        .catch(function (error) {
-          console.log('Calling nonsitemap fn:' + url);
-          getNonSitemapURLS(url);
-        })
+            else {
+              callback(XMLSitemap, "pass");
+            }
+          })
+          .catch(function (error) {
+            console.log('Calling nonsitemap fn:' + url);
+            getNonSitemapURLS(url, url);
+          })
+      }
     }
 
     // retrieving info from sitemap
@@ -93,20 +100,25 @@ app.post('/estimator', (req, res) => {
         var urls = XMLSitemap.getElementsByTagName('url');
         console.log('pulling urls from sitemap:');
         count++;
-
-        for (var i = 0; i < urls.length; i++) {
-          var urlElement = urls[i];
-          var loc = urlElement.getElementsByTagName('loc')[0].textContent;
-          allURLs.push(loc);
+        if (urls.length == 0) {
+          console.log("calling non site map as URL length in 0");
+          getNonSitemapURLS(url, url);
         }
-        console.log('pages: ', array_status, allURLs);
-        length = length + urls.length;
-        if (array_status == "pass") {
-          pageData = {
-            allURLs: JSON.stringify(allURLs),
-          };
-          console.log('H1 no, sending Data: ', allURLs);
-          res.send(pageData);
+        else {
+          for (var i = 0; i < urls.length; i++) {
+            var urlElement = urls[i];
+            var loc = urlElement.getElementsByTagName('loc')[0].textContent;
+            allURLs.push(loc);
+          }
+          console.log('pages: ', array_status, allURLs);
+          length = length + urls.length;
+          if (array_status == "pass") {
+            pageData = {
+              allURLs: JSON.stringify(allURLs),
+            };
+            console.log('H1 no, sending Data: ', allURLs);
+            res.send(pageData);
+          }
         }
       } catch (err) {
         console.log('err:', err);
@@ -114,10 +126,10 @@ app.post('/estimator', (req, res) => {
     });
   }
 
-  async function getNonSitemapURLS(url) {
+  async function getNonSitemapURLS(url, url1) {
     try {
       console.log('url', url);
-      const response = await axios.get(url);
+      const response = await axios.get(url1);
       if (response.status === 200) {
         const html = response.data;
         let $ = cheerio.load(html);
@@ -133,32 +145,33 @@ app.post('/estimator', (req, res) => {
               }
               newURL = url + "/" + linkUrl.split('#')[0];
               console.log('newURL:', newURL);
-              if (!allPageLinks.includes(newURL) && !newURL.includes('tel') && newURL.startsWith(url)) {
+              if (!allPageLinks.includes(newURL) && !newURL.includes('tel') && !newURL.includes('mailto') && newURL.startsWith(url)) {
                 allPageLinks.push(newURL);
               }
-            } else if (!allPageLinks.includes(linkUrl) && linkUrl.startsWith(url) && !linkUrl.includes('tel')) {
+            } else if (!allPageLinks.includes(linkUrl) && linkUrl.startsWith(url) && !linkUrl.includes('tel') && !linkUrl.includes('mailto')) {
               allPageLinks.push(linkUrl);
             }
           }
         });
         allURLs = [];
-        countPages = 0;
         allURLs = allPageLinks;
-        console.log('allUrls length:', allURLs.length);
-        console.log('allURLs:', allURLs);
-        $ = "";
+        // console.log('allUrls length:', allURLs.length);
+        // console.log('allURLs:', allURLs);
       }
-      allURLs.forEach((pageUrl) => {
-        crawlnonsitemaparray(pageUrl, allURLs.length);
+      countPages = 0;
+      allPageLinks.forEach((pageUrl) => {
+        crawlnonsitemaparray(url, pageUrl, allPageLinks.length);
+        // console.log("Crawling inner link: ", url, pageUrl, allPageLinks.length);
       });
-      res.send(pageData);
+      // res.send(pageData);
     } catch (err) {
       console.log('err:', url, err);
     }
   }
 
-  async function crawlnonsitemaparray(pageUrl, len) {
+  async function crawlnonsitemaparray(url, pageUrl, len) {
     try {
+      // console.log("Crawling inner link:", pageUrl, len)
       const response = await axios.get(pageUrl);
       if (response.status === 200) {
         const html = response.data;
@@ -167,6 +180,7 @@ app.post('/estimator', (req, res) => {
         $('a').each(function () {
           var link = $(this);
           var linkUrl = link.attr('href');
+          // console.log("found link: ", linkUrl);
           if (linkUrl !== '' && linkUrl != null && linkUrl !== undefined) {
             var newURL = '';
             if (linkUrl.charAt(0) === '/' || !linkUrl.startsWith('http')) {
@@ -175,49 +189,43 @@ app.post('/estimator', (req, res) => {
               }
               newURL = url + "/" + linkUrl.split('#')[0];
               console.log('newURL:', newURL);
-              if (!allURLs.includes(newURL) && !newURL.includes('tel') && newURL.startsWith(url)) {
+              if (!allURLs.includes(newURL) && !newURL.includes('tel') && !newURL.includes('mailto') && newURL.startsWith(url)) {
                 allURLs.push(newURL);
               }
-            } else if (!allURLs.includes(linkUrl) && linkUrl.startsWith(url) && !linkUrl.includes('tel')) {
+            } else if (!allURLs.includes(linkUrl) && linkUrl.startsWith(url) && !linkUrl.includes('tel') && !linkUrl.includes('mailto')) {
               allURLs.push(linkUrl);
             }
           }
         });
         // allURLs = [];
         countPages = countPages + 1;
+        console.log("crawling page if: ", countPages);
       }
       else {
-        countPages +=  1;
+        countPages = countPages + 1;
+        console.log("crawling page else: ", countPages);
       }
       if (countPages == len) {
-        console.log("crawl completed, sending H1");
+        // console.log("crawl completed, sending H1");
         pageData = {
-          h1: JSON.stringify(headerURLs)
-        };
-        res.send(pageData);
-        console.log("H1 sent from Green:", pageUrl);
-      }
-
-    } catch (err) {
-      // h1Val = {
-      //   url: pageUrl
-      // };
-      // headerURLs.push(h1Val);
-      countPages = countPages + 1;
-      // console.log('err:', pageUrl, err);
-      console.log(len, countPages, pageUrl)
-      // console.log("H1 sent from Red:", pageUrl);
-      if (countPages == len) {
-        // console.log("crawl completed, sending H1 from catch");
-        pageData = {
-          h1: JSON.stringify(headerURLs)
+          allURLs: JSON.stringify(allURLs),
         };
         res.send(pageData);
         // console.log("H1 sent from Green:", pageUrl);
       }
+
+    } catch (err) {
+      countPages = countPages + 1;
+      console.log("crawling page catch: ", countPages);
+      // console.log('err:', pageUrl, err);
+      if (countPages == len) {
+        pageData = {
+          allURLs: JSON.stringify(allURLs),
+        };
+        res.send(pageData);
+      }
     }
   }
-
 
   async function getH1Content(pageUrl, len) {
     try {
