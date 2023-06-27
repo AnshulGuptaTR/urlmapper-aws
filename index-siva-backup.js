@@ -49,12 +49,12 @@ app.post('/estimator', (req, res) => {
       const sitemapURL = url + sitemapFile;
       console.log('checking sitemap exists:', sitemapURL);
 
-      if (url == 'https://www.bettersworthlaw.com' || url == 'https://www.bettersworthlaw.com/') {
-        console.log('premature Sitemap call');
-        getNonSitemapURLS(url, 'https://www.bettersworthlaw.com/sitemap');
-      } else {
-        axios
-          .get(sitemapURL)
+      if(url == "https://www.bettersworthlaw.com" || url == "https://www.bettersworthlaw.com/"){
+          console.log("premature Sitemap call");
+          getNonSitemapURLS(url, "https://www.bettersworthlaw.com/sitemap");
+      }
+      else {
+        axios.get(sitemapURL)
           .then(function (response) {
             // handle success
             // console.log(response);
@@ -68,38 +68,29 @@ app.post('/estimator', (req, res) => {
             if (sitemaps !== undefined && sitemaps.length > 0) {
               for (var i = 0; i < sitemaps.length; i++) {
                 console.log('subFileName: ', sitemaps[i].getElementsByTagName('loc')[0].textContent);
-                axios
-                  .get(sitemaps[i].getElementsByTagName('loc')[0].textContent)
+                axios.get(sitemaps[i].getElementsByTagName('loc')[0].textContent)
                   .then(function (response) {
                     loopSitemaps = loopSitemaps + 1;
                     var subSitemapContent = response.data;
                     var subXMLSitemap = parseXMLSitemap(subSitemapContent);
                     console.log('sub: ', loopSitemaps, sitemaps.length);
                     if (loopSitemaps == sitemaps.length) {
-                      callback(subXMLSitemap, 'pass');
-                    } else {
+                      callback(subXMLSitemap, "pass");
+                    }
+                    else {
                       callback(subXMLSitemap);
                     }
                   })
-                  .catch(function (error) {
-                    if (error.response.status == 404) {
-                      loopSitemaps = loopSitemaps + 1;
-                      var subSitemapContent = error.response.data;
-                      var subXMLSitemap = parseXMLSitemap(subSitemapContent);
-                      if (loopSitemaps == sitemaps.length) {
-                        callback(subXMLSitemap, 'pass');
-                      }
-                    }
-                  });
               }
-            } else {
-              callback(XMLSitemap, 'pass');
+            }
+            else {
+              callback(XMLSitemap, "pass");
             }
           })
           .catch(function (error) {
             console.log('Calling nonsitemap fn:' + url);
             getNonSitemapURLS(url, url);
-          });
+          })
       }
     }
 
@@ -110,9 +101,10 @@ app.post('/estimator', (req, res) => {
         console.log('pulling urls from sitemap:');
         count++;
         if (urls.length == 0) {
-          console.log('calling non site map as URL length in 0');
+          console.log("calling non site map as URL length in 0");
           getNonSitemapURLS(url, url);
-        } else {
+        }
+        else {
           for (var i = 0; i < urls.length; i++) {
             var urlElement = urls[i];
             var loc = urlElement.getElementsByTagName('loc')[0].textContent;
@@ -120,7 +112,7 @@ app.post('/estimator', (req, res) => {
           }
           console.log('pages: ', array_status, allURLs);
           length = length + urls.length;
-          if (array_status == 'pass') {
+          if (array_status == "pass") {
             pageData = {
               allURLs: JSON.stringify(allURLs),
             };
@@ -151,22 +143,12 @@ app.post('/estimator', (req, res) => {
               if (linkUrl.charAt(0) === '/') {
                 linkUrl = linkUrl.substring(1);
               }
-              newURL = url + '/' + linkUrl.split('#')[0];
+              newURL = url + "/" + linkUrl.split('#')[0];
               console.log('newURL:', newURL);
-              if (
-                !allPageLinks.includes(newURL) &&
-                !newURL.includes('tel') &&
-                !newURL.includes('mailto') &&
-                newURL.startsWith(url)
-              ) {
+              if (!allPageLinks.includes(newURL) && !newURL.includes('tel') && !newURL.includes('mailto') && newURL.startsWith(url)) {
                 allPageLinks.push(newURL);
               }
-            } else if (
-              !allPageLinks.includes(linkUrl) &&
-              linkUrl.startsWith(url) &&
-              !linkUrl.includes('tel') &&
-              !linkUrl.includes('mailto')
-            ) {
+            } else if (!allPageLinks.includes(linkUrl) && linkUrl.startsWith(url) && !linkUrl.includes('tel') && !linkUrl.includes('mailto')) {
               allPageLinks.push(linkUrl);
             }
           }
@@ -205,32 +187,23 @@ app.post('/estimator', (req, res) => {
               if (linkUrl.charAt(0) === '/') {
                 linkUrl = linkUrl.substring(1);
               }
-              newURL = url + '/' + linkUrl.split('#')[0];
+              newURL = url + "/" + linkUrl.split('#')[0];
               console.log('newURL:', newURL);
-              if (
-                !allURLs.includes(newURL) &&
-                !newURL.includes('tel') &&
-                !newURL.includes('mailto') &&
-                newURL.startsWith(url)
-              ) {
+              if (!allURLs.includes(newURL) && !newURL.includes('tel') && !newURL.includes('mailto') && newURL.startsWith(url)) {
                 allURLs.push(newURL);
               }
-            } else if (
-              !allURLs.includes(linkUrl) &&
-              linkUrl.startsWith(url) &&
-              !linkUrl.includes('tel') &&
-              !linkUrl.includes('mailto')
-            ) {
+            } else if (!allURLs.includes(linkUrl) && linkUrl.startsWith(url) && !linkUrl.includes('tel') && !linkUrl.includes('mailto')) {
               allURLs.push(linkUrl);
             }
           }
         });
         // allURLs = [];
         countPages = countPages + 1;
-        console.log('crawling page if: ', countPages);
-      } else {
+        console.log("crawling page if: ", countPages);
+      }
+      else {
         countPages = countPages + 1;
-        console.log('crawling page else: ', countPages);
+        console.log("crawling page else: ", countPages);
       }
       if (countPages == len) {
         // console.log("crawl completed, sending H1");
@@ -240,9 +213,10 @@ app.post('/estimator', (req, res) => {
         res.send(pageData);
         // console.log("H1 sent from Green:", pageUrl);
       }
+
     } catch (err) {
       countPages = countPages + 1;
-      console.log('crawling page catch: ', countPages);
+      console.log("crawling page catch: ", countPages);
       // console.log('err:', pageUrl, err);
       if (countPages == len) {
         pageData = {
@@ -265,29 +239,31 @@ app.post('/estimator', (req, res) => {
         h1Val = {
           url: pageUrl,
           h1: q,
-          statusCode: response.status,
+          statusCode: response.status
         };
         headerURLs.push(h1Val);
         countPages = countPages + 1;
-        console.log(len, countPages, ' Status: ', response.status, pageUrl);
-        $ = '';
-      } else {
+        console.log(len, countPages, " Status: ", response.status, pageUrl)
+        $ = "";
+      }
+      else {
         h1Val = {
           url: pageUrl,
-          statusCode: response.status,
+          statusCode: response.status
         };
         headerURLs.push(h1Val);
-        countPages += 1;
-        console.log(len, countPages, ' Status: ', response.status, pageUrl);
+        countPages +=  1;
+        console.log(len, countPages, " Status: ", response.status, pageUrl)
       }
       if (countPages == len) {
-        console.log('crawl completed, sending H1');
+        console.log("crawl completed, sending H1");
         pageData = {
-          h1: JSON.stringify(headerURLs),
+          h1: JSON.stringify(headerURLs)
         };
         res.send(pageData);
-        console.log('H1 sent from Green:', pageUrl);
+        console.log("H1 sent from Green:", pageUrl);
       }
+
     } catch (err) {
       // h1Val = {
       //   url: pageUrl
@@ -295,12 +271,12 @@ app.post('/estimator', (req, res) => {
       // headerURLs.push(h1Val);
       countPages = countPages + 1;
       // console.log('err:', pageUrl, err);
-      console.log(len, countPages, pageUrl);
+      console.log(len, countPages, pageUrl)
       // console.log("H1 sent from Red:", pageUrl);
       if (countPages == len) {
         // console.log("crawl completed, sending H1 from catch");
         pageData = {
-          h1: JSON.stringify(headerURLs),
+          h1: JSON.stringify(headerURLs)
         };
         res.send(pageData);
         // console.log("H1 sent from Green:", pageUrl);
@@ -338,13 +314,12 @@ app.post('/dupecontent', (req, res) => {
 
   // axios.get(url)
   //   .then(function (response) {
-
+      
   // Get Sitemap content and parse it to DOM
   async function getSitemapURLs(sitemapFile, callback) {
     const sitemapURL = url + sitemapFile;
     console.log('checking sitemap exists:', sitemapURL);
-    axios
-      .get(sitemapURL)
+    axios.get(sitemapURL)
       .then(function (response) {
         // handle success
         console.log(response);
@@ -358,37 +333,42 @@ app.post('/dupecontent', (req, res) => {
         if (sitemaps !== undefined && sitemaps.length > 0) {
           for (var i = 0; i < sitemaps.length; i++) {
             // console.log('subFileName: ', sitemaps[i].getElementsByTagName('loc')[0].textContent);
-            axios.get(sitemaps[i].getElementsByTagName('loc')[0].textContent).then(function (response) {
-              loopSitemaps = loopSitemaps + 1;
-              var subSitemapContent = response.data;
-              var subXMLSitemap = parseXMLSitemap(subSitemapContent);
-              // console.log('sub: ', loopSitemaps, sitemaps.length);
-              // console.log('response URI: ', response.request.path);
-              if (loopSitemaps == sitemaps.length) {
-                if (response.request.path.includes('post')) {
-                  callback(subXMLSitemap, 'blog', 'pass');
-                  // console.log("blog XML found", response.request.path);
-                } else {
-                  callback(subXMLSitemap, 'pages', 'pass');
+            axios.get(sitemaps[i].getElementsByTagName('loc')[0].textContent)
+              .then(function (response) {
+                loopSitemaps = loopSitemaps + 1;
+                var subSitemapContent = response.data;
+                var subXMLSitemap = parseXMLSitemap(subSitemapContent);
+                // console.log('sub: ', loopSitemaps, sitemaps.length);
+                // console.log('response URI: ', response.request.path);
+                if (loopSitemaps == sitemaps.length) {
+                  if(response.request.path.includes("post")){
+                    callback(subXMLSitemap, "blog", "pass");
+                    // console.log("blog XML found", response.request.path);
+                  }
+                  else{
+                    callback(subXMLSitemap, "pages", "pass");
+                  }
                 }
-              } else {
-                if (response.request.path.includes('post')) {
-                  callback(subXMLSitemap, 'blog', 'fail');
-                  // console.log("blog XML found", response.request.path);
-                } else {
-                  callback(subXMLSitemap, 'pages', 'fail');
+                else {
+                  if(response.request.path.includes("post")){
+                    callback(subXMLSitemap, "blog", "fail");
+                    // console.log("blog XML found", response.request.path);
+                  }
+                  else{
+                    callback(subXMLSitemap, "pages", "fail");
+                  }
                 }
-              }
-            });
+              })
           }
-        } else {
-          callback(XMLSitemap, '', 'pass');
+        }
+        else {
+          callback(XMLSitemap, "", "pass");
         }
       })
       .catch(function (error) {
         console.log('Calling nonsitemap fn:' + url);
         getNonSitemapURLS(url, url);
-      });
+      })
   }
 
   // retrieving info from sitemap
@@ -398,24 +378,20 @@ app.post('/dupecontent', (req, res) => {
       // console.log('urls:', url);
       count++;
       if (urls.length == 0) {
-        console.log('calling non site map as URL length in 0');
+        console.log("calling non site map as URL length in 0");
         getNonSitemapURLS(url, url);
-      } else {
+      }
+      else {
         for (var i = 0; i < urls.length; i++) {
           var urlElement = urls[i];
           var loc = urlElement.getElementsByTagName('loc')[0].textContent;
-          if (loc.includes('.pdf') && !pdfPages.includes(loc)) {
+          if((loc.includes('.pdf')) && !pdfPages.includes(loc)){
             pdfPages.push(loc);
-            console.log('pdf found: ', loc);
-          } else {
+            console.log("pdf found: ", loc);
+          }
+          else{
             allURLs.push(loc);
-            if (
-              loc.includes('/tag/') ||
-              loc.includes('/categories/') ||
-              loc.includes('/post/') ||
-              loc.includes('/blog/') ||
-              blog_pages == 'blog'
-            ) {
+            if (loc.includes('/tag/') || loc.includes('/categories/') || loc.includes('/post/') || loc.includes('/blog/') || blog_pages == "blog") {
               blogs.push(loc);
             } else {
               pages.push(loc);
@@ -424,11 +400,11 @@ app.post('/dupecontent', (req, res) => {
         }
         // console.log('pages: ', array_status, allURLs);
         length = length + urls.length;
-        if (array_status == 'pass') {
+        if (array_status == "pass") {
           pageData = {
             allURLs: allURLs,
             blogs: blogs,
-            pages: pages,
+            pages: pages
           };
           // console.log('All Images111222:', pages);
           res.send(pageData);
@@ -457,12 +433,13 @@ app.post('/dupecontent', (req, res) => {
               if (linkUrl.charAt(0) === '/') {
                 linkUrl = linkUrl.substring(1);
               }
-              newURL = url + '/' + linkUrl.split('#')[0];
+              newURL = url + "/" + linkUrl.split('#')[0];
               console.log('newURL:', newURL);
               if (!allPageLinks.includes(newURL) && compare(newURL) && newURL.startsWith(url)) {
-                if (newURL.includes('.pdf') && !pdfPages.includes(newURL)) {
+                if((newURL.includes('.pdf')) && !pdfPages.includes(newURL)){
                   pdfPages.push(newURL);
-                } else {
+                }
+                else{
                   allPageLinks.push(newURL);
                   if (
                     newURL.includes('/tag/') ||
@@ -503,19 +480,19 @@ app.post('/dupecontent', (req, res) => {
       });
       // res.send(pageData);
     } catch (err) {
-      var parser_checkfindlaw = new DOMParser();
-      var check_findlaw = parser_checkfindlaw.parseFromString(err.response.data, 'text/html');
-      console.log(check_findlaw.getElementsByTagName('title')[0].textContent);
-      if (check_findlaw.getElementsByTagName('title')[0].textContent == 'Just a moment...') {
+       var parser_checkfindlaw = new DOMParser();
+       var check_findlaw = parser_checkfindlaw.parseFromString(err.response.data, 'text/html');
+       console.log(check_findlaw.getElementsByTagName('title')[0].textContent);
+       if(check_findlaw.getElementsByTagName('title')[0].textContent == "Just a moment..."){
         pageData = {
-          allURLs: 'FindLaw_Site',
+          allURLs: "FindLaw_Site"
         };
         res.send(pageData);
-        console.log('Response sent findlaw!');
-      } else {
-        // console.log('err:', err.response.data);
-        console.log('err:', url, err);
-      }
+        console.log("Response sent findlaw!");
+       } else {
+       // console.log('err:', err.response.data);
+          console.log('err:', url, err);
+       }
     }
   }
 
@@ -537,12 +514,13 @@ app.post('/dupecontent', (req, res) => {
               if (linkUrl.charAt(0) === '/') {
                 linkUrl = linkUrl.substring(1);
               }
-              newURL = url + '/' + linkUrl.split('#')[0];
+              newURL = url + "/" + linkUrl.split('#')[0];
               console.log('newURL:', newURL);
               if (!allURLs.includes(newURL) && compare(newURL) && newURL.startsWith(url)) {
-                if (newURL.includes('.pdf') && !pdfPages.includes(newURL)) {
+                if((newURL.includes('.pdf')) && !pdfPages.includes(newURL)){
                   pdfPages.push(newURL);
-                } else {
+                }
+                else{
                   allURLs.push(newURL);
                   if (
                     newURL.includes('/tag/') ||
@@ -557,9 +535,10 @@ app.post('/dupecontent', (req, res) => {
                 }
               }
             } else if (!allURLs.includes(linkUrl) && linkUrl.startsWith(url) && compare(linkUrl)) {
-              if (linkUrl.includes('.pdf') && !pdfPages.includes(linkUrl)) {
+              if((linkUrl.includes('.pdf')) && !pdfPages.includes(linkUrl)){
                 pdfPages.push(linkUrl);
-              } else {
+              }
+              else{
                 allURLs.push(linkUrl);
                 if (
                   linkUrl.includes('/tag/') ||
@@ -577,23 +556,25 @@ app.post('/dupecontent', (req, res) => {
         });
         // allURLs = [];
         countPages = countPages + 1;
-        console.log('crawling page if: ', countPages);
-      } else {
+        console.log("crawling page if: ", countPages);
+      }
+      else {
         countPages = countPages + 1;
-        console.log('crawling page else: ', countPages);
+        console.log("crawling page else: ", countPages);
       }
       if (countPages == len) {
         pageData = {
           allURLs: allURLs,
           blogs: blogs,
-          pages: pages,
+          pages: pages
         };
         res.send(pageData);
-        console.log('response sent for non-sitemap crawl!');
+        console.log("response sent for non-sitemap crawl!");
       }
+
     } catch (err) {
       countPages = countPages + 1;
-      console.log('crawling page catch: ', countPages);
+      console.log("crawling page catch: ", countPages);
       // console.log('err:', pageUrl, err);
       if (countPages == len) {
         // allURLs.forEach((pageUrl) => {
@@ -602,13 +583,13 @@ app.post('/dupecontent', (req, res) => {
         pageData = {
           allURLs: allURLs,
           blogs: blogs,
-          pages: pages,
+          pages: pages
         };
         res.send(pageData);
         console.log('response sent from catch!');
       }
     }
-  }
+  } 
 
   // parse a text string into an XML DOM object
   function parseXMLSitemap(sitemapContent) {
@@ -617,10 +598,11 @@ app.post('/dupecontent', (req, res) => {
     return xmlDoc;
   }
 
-  function compare(comparelink) {
-    if (comparelink.includes('tel:') || comparelink.includes('mailto:') || comparelink.includes('javascript')) {
+  function compare(comparelink){
+    if(comparelink.includes('tel:') || comparelink.includes('mailto:') || comparelink.includes('javascript')) {
       return false;
-    } else {
+    }
+    else{
       return true;
     }
   }
